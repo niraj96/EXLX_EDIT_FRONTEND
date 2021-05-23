@@ -1,0 +1,97 @@
+
+
+<!-- <router-outlet></router-outlet> -->
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <b>Manipulate Excel</b>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <input type="file" multiple="true" class="form-control" (change)="handleFile($event)">
+            </div>
+            <div class="col-md-6">
+              <button class="btn btn-primary">Manipulate</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="jsonData.length>0">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <b>Choose To Apply Changes</b>
+        </div>
+        <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="sheet_name">Sheet Name</label>
+                  <select [(ngModel)] = "selectedSheet"  name="sheet_name" id="sheet_name" class="form-control" (change)="handeSheetName($event)">
+                    <option  value="">--choose--</option>
+                    <option *ngFor="let sheet of sheetOtions; let i=index" [value]="i">{{sheet}}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="sub_sheet_name">Sub Sheet Name</label>
+                  <select [(ngModel)] = "slectedSubSheetIndex" name="sub_sheet_name" id="sub_sheet_name" class="form-control" (change)="handeSubSheetName($event)">
+                    <option *ngFor="let subSheet of subSheetOtions; let j=index" [value]="j">{{subSheet}}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="row_no">Field at Row No.</label>
+                  <input [(ngModel)] = "slectedRow" type="number"  id="row_no" class="form-control"  (change)="handleRow($event)">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="field_name">Field Name</label>
+                  <select name="field_name" id="field_name" class="form-control" (change)="handleField($event)">
+                    <option *ngFor="let field of fieldOtions; let k=index;" value="{{k}}">{{field.name}}</option>
+                  </select>
+                </div>
+              </div>
+              <!-- <div class="col-md-4">
+                <button type="button" class="btn btn-primary" style="position: absolute;top: 31px;">Proceed to Customize</button>
+              </div> -->
+            </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="jsonData.length>0">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          Apply Changes 
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <input [(ngModel)] = "fieldName" type="text" class="form-control" >
+            </div>
+            <div class="col-md-4">
+              <select [(ngModel)] = "fieldType" class="form-control">
+                <option value="">--choose--</option>
+                <option *ngFor="let type of availableDataTypes; let k=index;" [value]="k">{{type}}</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-success" (click)="handleSubmit()">Modify</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
