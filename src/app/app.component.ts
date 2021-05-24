@@ -9,22 +9,8 @@ export class AppComponent{
   title = 'frontend';
   fileList: File [] = [];
   jsonData:any = [];
-
-  sheetOtions: Array<any> = [];
-  subSheetOtions: Array<any> = [];
-  fieldOtions: Array<any> = [];
-
-  selectedSheet: any = '';
-  slectedSubSheetName: string = '';
-  slectedSubSheetIndex: any = '';
-  slectedRow: any = 0;
-  fieldKey:string = '';
-  fieldName: string = '';
-  fieldType: string = '';
-
+  inputStruct: any = [];
   availableDataTypes: string[] = ['string', 'number', 'date'];
-
-
 
   constructor(private serv: AppService){
    
@@ -40,87 +26,70 @@ export class AppComponent{
     this.serv.convertToJSON(formData).subscribe(data=>{ 
       this.jsonData = data;
   
-      this.jsonData.forEach(ele=>{
+      this.jsonData.forEach((ele,i)=>{
+
+        let obj = {};
+        obj['name'] = ele.name;
+        let fieldData = ele.data;
+        let subSheetList = Object.keys(fieldData);
+        obj['subsheet'] = subSheetList;
+        obj['field'] = {};
+        obj['row'] = 0;
+        obj['selectedSubsheet'] = 0;
+        obj['fieldKey'] = 0;
   
-        let sheetname = ele.name;
-        this.sheetOtions.push(sheetname);
+        subSheetList.forEach(key=>{
+          obj['field'][key] = [];
+          
+          fieldData[key].forEach(element => {
+            let arr = [];
+            for(let x in element){
+              arr.push({col:x, name: element[x]})
+            }
+            obj['field'][key].push(arr);
+          });
+         
+        });
+
+        obj['fieldName']  = obj['field'][subSheetList[0]][0][0]['name']
+        obj['fieldType'] = "";
+
+        this.inputStruct.push(obj);
        
       });
   
-      console.log(this.jsonData);
+      console.log(this.jsonData, this.inputStruct);
     },err=>{})
 
   }
 
-  handeSheetName(event:any){
 
-    if(event.target.value != ''){
-      this.selectedSheet = event.target.value;
-      let sheetData = this.jsonData[this.selectedSheet];
-      this.subSheetOtions = Object.keys(sheetData.data);
-      this.slectedSubSheetName = this.subSheetOtions[0];
-
-      let fieldObj = this.jsonData[this.selectedSheet]['data'][ this.slectedSubSheetName][this.slectedRow];
-      this.setFieldOption(fieldObj);
-    }
-
-  }
-
-  handeSubSheetName(event:any){
-    if(event.target.value != ''){
-    let subsheetName = this.subSheetOtions[event.target.value];
-    this.slectedSubSheetName = subsheetName;
-    
-    let fieldObj = this.jsonData[this.selectedSheet]['data'][ this.slectedSubSheetName][this.slectedRow];
-    this.setFieldOption(fieldObj);
-    }
-    
-  }
-
-  handleRow(event:any){
-    if(event.target.value != ''){
-    this.slectedRow = event.target.value;
-    let fieldObj = this.jsonData[this.selectedSheet]['data'][ this.slectedSubSheetName][this.slectedRow];
-    this.setFieldOption(fieldObj);
-    }
-  }
-
-  handleField(event:any){
-    // let fieldObj = this.jsonData[this.selectedSheet]['data'][ this.slectedSubSheetName][this.slectedRow];
-    // this.setFieldOption(fieldObj, event.target.value);
-    console.log(this.fieldOtions[event.target.value], event.target.value);
-    this.fieldKey = this.fieldOtions[event.target.value]['key'];
-    this.fieldName = this.fieldOtions[event.target.value]['name'];
-  }
-
-  setFieldOption(fieldObj, index=0){
-    this.fieldOtions.length = 0;
-    Object.keys(fieldObj).forEach(el=>{
-      this.fieldOtions.push({key:el, name: fieldObj[el]});
-    });
-    this.fieldKey = this.fieldOtions[index]['key'];
-    this.fieldName = this.fieldOtions[index]['name'];
-  }
-
- 
+  
   handleSubmit(){
-    let postdata = {
-      config:{
-        sheetName: this.jsonData[this.selectedSheet]['name'],
-        sheet: this.selectedSheet,
-        subsheet: this.slectedSubSheetName,
-        row: this.slectedRow,
-        col: this.fieldKey,
-        fieldName: this.fieldName,
-        dataType: this.availableDataTypes[this.fieldType]
-      },
-      dataset:this.jsonData[this.selectedSheet]
-      
-    }
+    this.inputStruct.forEach((element,i) => {
 
+      let fieldtyepe = ( element.fieldType !="")?this.availableDataTypes[element.fieldType]:"";
+    
+     
+      let postdata = {
+        config:{
+          sheetName: this.jsonData[i]['name'],
+          sheet: i,
+          subsheet: element.subsheet[element.selectedSubsheet],
+          row: element.row,
+          col: element.field[element.subsheet[element.selectedSubsheet]][element.row][element.fieldKey]['col'],
+          fieldName: element.fieldName,
+          dataType: fieldtyepe
+        },
+        dataset:this.jsonData[i]
+        
+      }
 
-    this.serv.updateExcel(postdata);
-    console.log('pppp', postdata);
+      console.log(postdata);
+      this.serv.updateExcel(postdata);
+
+    });
+    
     
   }
 }
